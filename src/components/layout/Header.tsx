@@ -26,7 +26,7 @@ const Header: React.FC = () => {
           <div className="w-6 h-6 rounded bg-foreground flex items-center justify-center">
             <div className="w-3 h-3 bg-background rounded-sm"></div>
           </div>
-          <span className="font-semibold text-lg">Francium</span>
+          <span className="font-semibold text-lg">Preppin</span>
         </Link>
 
         {/* Right Actions */}

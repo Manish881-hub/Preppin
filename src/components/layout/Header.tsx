@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import SearchModal from '@/components/ui-custom/SearchModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import {
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-border h-14 flex items-center px-4">
@@ -24,16 +26,18 @@ const Header: React.FC = () => {
           <div className="w-6 h-6 rounded bg-foreground flex items-center justify-center">
             <div className="w-3 h-3 bg-background rounded-sm"></div>
           </div>
-          <span className="font-semibold text-lg">Preppin</span>
+          <span className="font-semibold text-lg">Francium</span>
         </Link>
 
         {/* Right Actions */}
         <div className="flex items-center space-x-3">
           {/* Search Button */}
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/search">
-              <Search className="h-5 w-5" />
-            </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search className="h-5 w-5" />
           </Button>
 
           {/* User Profile Dropdown */}
@@ -76,6 +80,9 @@ const Header: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Search Modal */}
+      <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 };

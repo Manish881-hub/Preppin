@@ -17,105 +17,92 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ post, onUpvote, compact = false }) => {
   return (
-    <Card className={cn(
-      "overflow-hidden transition-all duration-300",
-      compact ? "border-0 shadow-none" : "card-hover"
-    )}>
-      <CardHeader className={cn(
-        "space-y-0",
-        compact ? "p-3" : "p-4"
-      )}>
-        <div className="flex justify-between items-start gap-2">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={post.author.avatar} alt={post.author.name} />
-              <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium text-sm leading-none">{post.author.name}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                {formatDistance(new Date(post.createdAt), new Date(), { addSuffix: true })}
+    <Card className="overflow-hidden transition-all duration-200 hover:bg-accent/50">
+      <CardContent className="p-4">
+        <Link to={`/post/${post.id}`} className="block space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Avatar className="h-8 w-8 flex-shrink-0">
+                <AvatarImage src={post.author.avatar} alt={post.author.name} />
+                <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm truncate">{post.author.name}</span>
+                  <span className="text-xs text-muted-foreground">·</span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistance(new Date(post.createdAt), new Date(), { addSuffix: true })}
+                  </span>
+                </div>
               </div>
             </div>
+            <Badge variant="outline" className="text-xs flex-shrink-0">
+              {post.company}
+            </Badge>
           </div>
 
-          <Badge variant="outline" className="bg-background/80">
-            {post.company}
-          </Badge>
-        </div>
-      </CardHeader>
-
-      <CardContent className={cn(
-        compact ? "p-3 pt-0" : "px-4 pb-3"
-      )}>
-        <Link to={`/post/${post.id}`} className="block">
-          <h3 className={cn(
-            "font-semibold text-foreground mb-2 transition-colors hover:text-primary",
-            compact ? "text-base" : "text-lg"
-          )}>
+          <h3 className="font-semibold text-base leading-snug transition-colors hover:text-primary">
             {post.title}
           </h3>
 
-          {!compact && (
-            <p className="text-muted-foreground text-sm line-clamp-2">
-              {post.content}
-            </p>
-          )}
+          <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">
+            {post.content}
+          </p>
 
-          {!compact && (
-            <div className="mt-3 space-x-2">
-              {post.tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="bg-secondary/50">
+          {post.tags.length > 0 && (
+            <div className="flex gap-1.5 flex-wrap">
+              {post.tags.slice(0, 3).map(tag => (
+                <Badge key={tag} variant="secondary" className="text-xs font-normal">
                   {tag}
                 </Badge>
               ))}
             </div>
           )}
 
-          {!compact && post.isPremium && (
-            <div className="mt-4 flex items-center text-sm text-muted-foreground">
-              <Lock className="h-4 w-4 mr-1" />
-              <span>Questions are locked. Subscribe to view</span>
+          {post.isPremium && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" />
+              <span>Premium content</span>
             </div>
           )}
         </Link>
+
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 gap-1.5 text-muted-foreground hover:text-primary"
+            onClick={(e) => {
+              e.preventDefault();
+              onUpvote(post.id);
+            }}
+          >
+            <ArrowUpCircle className="h-4 w-4" />
+            <span className="text-xs">{post.upvotes}</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 gap-1.5 text-muted-foreground hover:text-primary"
+            asChild
+          >
+            <Link to={`/post/${post.id}#comments`} onClick={(e) => e.stopPropagation()}>
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-xs">{post.comments}</span>
+            </Link>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 gap-1.5 text-muted-foreground hover:text-primary ml-auto"
+            onClick={(e) => e.preventDefault()}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </div>
       </CardContent>
-
-      <CardFooter className={cn(
-        "flex justify-between border-t py-3",
-        compact ? "px-3" : "px-4"
-      )}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-primary"
-          onClick={() => onUpvote(post.id)}
-        >
-          <ArrowUpCircle className="h-5 w-5" />
-          <span>{post.upvotes}</span>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-1.5 text-muted-foreground"
-          asChild
-        >
-          <Link to={`/post/${post.id}#comments`}>
-            <MessageCircle className="h-5 w-5" />
-            <span>{post.comments}</span>
-          </Link>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-1.5 text-muted-foreground"
-        >
-          <Share2 className="h-5 w-5" />
-          <span>Share</span>
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

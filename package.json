@@ -1,14 +1,35 @@
 {
-  "name": "prep-in",
+  "name": "preppin",
+  "version": "1.0.0",
+  "description": "PrepIn - Share and discover real interview experiences from top tech companies",
+  "author": "Manish Kumar",
+  "license": "EPL-2.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "keywords": [
+    "interview-prep",
+    "career",
+    "job-search",
+    "interview-experiences",
+    "tech-interviews"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Manish881-hub/Preppin"
+  },
+  "bugs": {
+    "url": "https://github.com/Manish881-hub/Preppin/issues"
+  },
+  "homepage": "https://preppin.app",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -81,5 +102,9 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^6.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

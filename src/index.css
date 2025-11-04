@@ -4,6 +4,7 @@
 @import url("https://rsms.me/inter/inter.css");
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
+
 html,
 body,
 #root,
@@ -124,7 +125,7 @@ body {
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: "Inter var", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    font-family: "Inter var", "Inter", system-ui, -apple-system, "Segoe UI",
       Roboto, "Helvetica Neue", Arial, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
@@ -202,5 +203,12 @@ body {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/* Make sure these styles are applied to the root elements */
+@layer base {
+  html {
+    font-family: "Inter var", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   }
 }

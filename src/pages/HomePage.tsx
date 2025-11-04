@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import useStore from '@/store/store';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,7 +27,6 @@ const HomePage: React.FC = () => {
   const { user } = useAuth();
   const [displayedPosts, setDisplayedPosts] = useState(5);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -46,19 +45,17 @@ const HomePage: React.FC = () => {
     .sort((a, b) => (b.upvotes + b.comments) - (a.upvotes + a.comments))
     .slice(0, 5);
 
-  // Load more posts on scroll
-  const handleScroll = useCallback(() => {
-    const container = scrollContainerRef.current;
-    const scrollTop = container?.scrollTop || 0;
-    const scrollHeight = container?.scrollHeight || 0;
-    const clientHeight = container?.clientHeight || 0;
+  // Load more posts when user scrolls near bottom of the page
+  const handleWindowScroll = useCallback(() => {
+    const scrollTop = window.scrollY || window.pageYOffset;
+    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+    const clientHeight = window.innerHeight || document.documentElement.clientHeight;
 
-    // Load more when user scrolls to 80% of the content
+    // Load more when user scrolls to 80% of the page
     if (scrollTop + clientHeight >= scrollHeight * 0.8) {
-      if (displayedPosts < relevantPosts.length) {
+      if (displayedPosts < relevantPosts.length && !isLoadingMore) {
         setIsLoadingMore(true);
-
-        // Simulate loading delay
+        // Simulate loading delay (or call fetch for next page)
         setTimeout(() => {
           setDisplayedPosts(prev => Math.min(prev + 5, relevantPosts.length));
           setIsLoadingMore(false);
@@ -68,22 +65,17 @@ const HomePage: React.FC = () => {
   }, [displayedPosts, relevantPosts.length, isLoadingMore]);
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
-  }, [handleScroll]);
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleWindowScroll);
+  }, [handleWindowScroll]);
 
   return (
     <AppLayout>
       <div className="home-page page-container animate-fade-in">
-        <div className="flex gap-6 h-[calc(100vh-80px)]">
-          {/* Left Container - Scrollable Feed */}
-          <div
-            ref={scrollContainerRef}
-            className="left-container flex-1 flex flex-col overflow-y-auto overflow-x-hidden pr-2"
-          >
+        {/* Remove fixed height here so document body scrolls */}
+        <div className="flex gap-6">
+          {/* Left Container - Feed (no internal scroll) */}
+          <div className="left-container flex-1 flex flex-col pr-2">
             <div className="home-wrapper flex flex-col space-y-6">
               {/* Header */}
               <header className="home-header pt-2 pb-4 sticky top-0 bg-background z-10">
@@ -119,7 +111,6 @@ const HomePage: React.FC = () => {
                   </div>
 
                   {postsLoading ? (
-                    // Loading skeleton
                     <div className="feed-skeleton space-y-4">
                       {[...Array(3)].map((_, i) => (
                         <div key={i} className="feed-skeleton-card border rounded-lg p-4 space-y-3">
@@ -142,7 +133,7 @@ const HomePage: React.FC = () => {
                     </div>
                   ) : relevantPosts.length > 0 ? (
                     <div className="feed-posts space-y-4">
-                      {/* Display posts with infinite scroll */}
+                      {/* Display posts with page-based infinite scroll */}
                       {relevantPosts.slice(0, displayedPosts).map(post => (
                         <PostCard
                           key={post.id}
@@ -205,9 +196,8 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Container - Fixed Companies Sidebar */}
-          <div className="right-container w-[350px] h-full overflow-y-auto bg-card border rounded-lg p-6 hidden md:block">
-            {/* Followed Companies */}
+          {/* Right Container - Companies Sidebar (no internal scroll) */}
+          <div className="right-container w-[350px] bg-card border rounded-lg p-6 hidden md:block">
             <section className="companies-section sticky top-0">
               <div className="companies-header flex items-center justify-between mb-4">
                 <h2 className="companies-title text-xl font-semibold">Companies</h2>
@@ -220,7 +210,6 @@ const HomePage: React.FC = () => {
               </div>
 
               {companiesLoading ? (
-                // Loading skeleton
                 <div className="companies-skeleton space-y-4">
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="companies-skeleton-card border rounded-lg p-4 space-y-3">

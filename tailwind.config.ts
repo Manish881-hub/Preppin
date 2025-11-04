@@ -2,7 +2,7 @@
 import type { Config } from "tailwindcss";
 import animatePlugin from "tailwindcss-animate";
 
-export default {
+const config: Config = {
 	darkMode: ["class"],
 	content: [
 		"./index.html",
@@ -181,3 +181,5 @@ export default {
 	},
 	plugins: [animatePlugin],
 } satisfies Config;
+
+export default config;

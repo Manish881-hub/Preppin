@@ -12,7 +12,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-background flex w-full">
+    <div className="min-h-screen bg-background flex w-full scrollbar-thin">
       {/* Header - visible on all screens */}
       <Header />
 
@@ -20,7 +20,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {!isMobile && <Sidebar />}
 
       {/* Main content */}
-      <main className="flex-1 w-full mt-14">
+      <main className="flex-1 w-full mt-14 overflow-auto scrollbar-thin">
         <div className="max-w-7xl mx-auto min-h-screen pb-16 md:pb-0 md:pl-0 animate-fade-in">
           {children}
         </div>

@@ -90,9 +90,7 @@ const HomePage: React.FC = () => {
               </header>
 
               {/* Search */}
-              <div className="home-search mx-auto w-full max-w-xl sticky top-20 bg-background z-10 pb-2">
-                <SearchBar fullWidth />
-              </div>
+
 
               {/* Main content - Posts */}
               <div className="feed-container space-y-6 pb-6">

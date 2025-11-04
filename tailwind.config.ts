@@ -164,7 +164,7 @@ const config: Config = {
 				'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			},
 			fontFamily: {
-				sans: ['Inter var', 'sans-serif'],
+				sans: ['"Inter var"', '"Inter"', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
 				display: ['SF Pro Display', 'Inter var', 'sans-serif'],
 			},
 			boxShadow: {

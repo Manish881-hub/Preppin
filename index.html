@@ -1,27 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+    <link rel="icon" sizes="32x32" href="/logo.png" type="image/png" />
+    <link rel="icon" sizes="16x16" href="/logo.png" type="image/png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prepin</title>
-    <meta name="description" content="Share your and discover Interview expreince and earn rewards" />
-    <meta name="author" content="Your Name" />
+    <title>Preppin</title>
+    <link rel="manifest" href="/manifest.json" />
 
-    <meta property="og:title" content="Prepin" />
+    <!-- Open Graph (social) -->
+    <meta property="og:title" content="Preppin" />
     <meta property="og:description" content="Share and discover interview experiences and earn rewards" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/logo.png" />
 
+    <!-- Twitter card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@your_twitter" />
     <meta name="twitter:image" content="/logo.png" />
+
+    <!-- Performance: preconnect for font hosts (helps Inter load faster) -->
+    <link rel="preconnect" href="https://rsms.me" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
 
   <body>
-    <div id="root" className="overflow-auto scrollbar-thin">
-      <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <div id="root" class="overflow-auto scrollbar-thin"></div>
 
-      <script type="module" src="/src/main.tsx"></script>
-    </div>
+    <!-- Vite / React entry -->
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Optional: service worker registration (Francium uses a registerSW script) -->
+    <!-- Add registerSW.js to your public folder if you want PWA support -->
+    <script src="/registerSW.js" defer></script>
   </body>
 </html>

@@ -23,9 +23,7 @@ const Header: React.FC = () => {
       <div className="flex items-center justify-between w-full max-w-full mx-auto">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded bg-foreground flex items-center justify-center">
-            <div className="w-3 h-3 bg-background rounded-sm"></div>
-          </div>
+          <img src="/logo.png" alt="Preppin Logo" className="w-8 h-8 rounded-md object-cover" />
           <span className="font-semibold text-lg">Preppin</span>
         </Link>
 

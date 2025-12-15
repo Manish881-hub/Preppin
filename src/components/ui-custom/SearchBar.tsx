@@ -8,12 +8,14 @@ interface SearchBarProps {
   onSearch?: (query: string) => void;
   placeholder?: string;
   fullWidth?: boolean;
+  className?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   placeholder = "Search for companies, questions...",
-  fullWidth = false
+  fullWidth = false,
+  className
 }) => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -36,7 +38,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <form
       onSubmit={handleSearch}
-      className={`flex items-center relative ${fullWidth ? 'w-full' : 'max-w-md'}`}
+      className={`flex items-center relative ${fullWidth ? 'w-full' : 'max-w-md'} ${className || ''}`}
     >
       <div className={`relative flex items-center w-full group glassmorphism rounded-full overflow-hidden border border-border transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/20 focus-within:border-primary/50`}>
         <Search className="h-4 w-4 absolute left-3.5 text-muted-foreground" />

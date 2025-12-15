@@ -1,13 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal } from 'lucide-react';
 import useStore from '@/store/store';
 import AppLayout from '@/components/layout/AppLayout';
 import PostCard from '@/components/ui-custom/PostCard';
 import CompanyCard from '@/components/ui-custom/CompanyCard';
 import SearchBar from '@/components/ui-custom/SearchBar';
+import FilterSidebar, { FilterState } from '@/components/ui-custom/FilterSidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const SearchPage: React.FC = () => {
   const location = useLocation();
@@ -16,6 +32,15 @@ const SearchPage: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [activeTab, setActiveTab] = useState('posts');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [sortOption, setSortOption] = useState('recent');
+
+  const [filters, setFilters] = useState<FilterState>({
+    roles: [],
+    companies: [],
+    difficulty: [],
+    verdict: [],
+  });
 
   const {
     posts,
@@ -29,6 +54,13 @@ const SearchPage: React.FC = () => {
     unfollowCompany,
   } = useStore();
 
+  // Load initial data if empty
+  useEffect(() => {
+    if (posts.length === 0) {
+      useStore.getState().fetchPosts();
+    }
+  }, [posts.length]);
+
   // Handle search when query changes
   useEffect(() => {
     if (searchQuery) {
@@ -37,8 +69,16 @@ const SearchPage: React.FC = () => {
       } else {
         searchCompanies(searchQuery);
       }
+    } else {
+      // If no search query, show all items (or handle as "Explore" mode)
+      // For now, we manually set searchResults to all posts/companies to enable filtering
+      if (activeTab === 'posts') {
+        useStore.setState({ searchResults: posts, searchLoading: false });
+      } else {
+        useStore.setState({ searchResults: companies, searchLoading: false });
+      }
     }
-  }, [searchQuery, activeTab, searchPosts, searchCompanies]);
+  }, [searchQuery, activeTab, searchPosts, searchCompanies, posts, companies]);
 
   // Filter initial results based on query
   useEffect(() => {
@@ -55,36 +95,129 @@ const SearchPage: React.FC = () => {
     setActiveTab(value);
   };
 
+  // Client-side filtering logic
+  const filteredResults = searchResults.filter((item) => {
+    // Basic type check
+    if (!item) return false;
+
+    // If company tab, only apply company filters?
+    // For now, let's focus logic on 'posts' since 'companies' usually just filters by name
+    if (activeTab === 'companies') return true;
+
+    // Filter by Role (mock logic: check if tag or title contains role)
+    if (filters.roles.length > 0) {
+      const matchRole = filters.roles.some(
+        (role) =>
+          item.title?.toLowerCase().includes(role.toLowerCase()) ||
+          item.tags?.some((tag: string) =>
+            tag.toLowerCase().includes(role.toLowerCase())
+          )
+      );
+      if (!matchRole) return false;
+    }
+
+    // Filter by Company
+    if (filters.companies.length > 0) {
+      if (!filters.companies.includes(item.company)) return false;
+    }
+
+    // Filter by Difficulty (mock logic: random assign or check tags)
+    // Since our sample data doesn't have difficulty, we skip this or mock it
+    // For this demo, let's assume if 'Hard' is selected, we filter nothing (placeholder)
+
+    return true;
+  });
+
+  // Sorting logic
+  const sortedResults = [...filteredResults].sort((a, b) => {
+    if (sortOption === 'recent') {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    if (sortOption === 'popular') {
+      // Assuming posts have upvotes, companies have followersCount
+      const scoreA = a.upvotes || a.followersCount || 0;
+      const scoreB = b.upvotes || b.followersCount || 0;
+      return scoreB - scoreA;
+    }
+    return 0;
+  });
+
   return (
     <AppLayout>
-      <div className="page-container animate-fade-in">
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Search</h1>
-          <p className="text-muted-foreground">
-            Find interview experiences and companies
-          </p>
+      <div className="page-container animate-fade-in pb-20">
+        <header className="mb-8 space-y-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Explore</h1>
+            <p className="text-muted-foreground mt-1">
+              Discover interview experiences, questions, and top tech companies
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search for roles, companies, questions..."
+                fullWidth
+                className="max-w-xl"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <Sheet open={showMobileFilters} onOpenChange={setShowMobileFilters}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="lg:hidden gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+                  <SheetHeader className="mb-6">
+                    <SheetTitle>Filters</SheetTitle>
+                  </SheetHeader>
+                  <FilterSidebar filters={filters} onFilterChange={setFilters} />
+                </SheetContent>
+              </Sheet>
+
+              <Select value={sortOption} onValueChange={setSortOption}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="popular">Most Popular</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </header>
 
-        <div className="mb-8">
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search for companies, questions, posts..."
-            fullWidth
-          />
-        </div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-64 shrink-0">
+            <div className="sticky top-24">
+              <FilterSidebar filters={filters} onFilterChange={setFilters} />
+            </div>
+          </aside>
 
-        {searchQuery ? (
-          <div>
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
             <Tabs
               defaultValue="posts"
               value={activeTab}
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList className="mb-6">
-                <TabsTrigger value="posts">Posts</TabsTrigger>
-                <TabsTrigger value="companies">Companies</TabsTrigger>
-              </TabsList>
+              <div className="flex items-center justify-between mb-6">
+                <TabsList>
+                  <TabsTrigger value="posts">Posts</TabsTrigger>
+                  <TabsTrigger value="companies">Companies</TabsTrigger>
+                </TabsList>
+
+                <div className="text-sm text-muted-foreground hidden sm:block">
+                  Showing {sortedResults.length} results
+                </div>
+              </div>
 
               <TabsContent value="posts" className="mt-0">
                 {searchLoading ? (
@@ -109,9 +242,9 @@ const SearchPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                ) : searchResults.length > 0 ? (
+                ) : sortedResults.length > 0 ? (
                   <div className="space-y-4">
-                    {searchResults.map(post => (
+                    {sortedResults.map(post => (
                       <PostCard
                         key={post.id}
                         post={post}
@@ -124,8 +257,18 @@ const SearchPage: React.FC = () => {
                     <Search className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
                     <h3 className="text-lg font-medium">No posts found</h3>
                     <p className="text-muted-foreground mt-1">
-                      Try different keywords or check the companies tab
+                      Try adjusting your filters or search keywords
                     </p>
+                    <Button
+                      variant="link"
+                      onClick={() => {
+                        setFilters({ roles: [], companies: [], difficulty: [], verdict: [] });
+                        setSearchQuery('');
+                      }}
+                      className="mt-2"
+                    >
+                      Clear all filters
+                    </Button>
                   </div>
                 )}
               </TabsContent>
@@ -133,7 +276,7 @@ const SearchPage: React.FC = () => {
               <TabsContent value="companies" className="mt-0">
                 {searchLoading ? (
                   // Loading skeleton
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {[...Array(6)].map((_, i) => (
                       <div key={i} className="border rounded-lg p-4 space-y-3">
                         <div className="flex items-center space-x-3">
@@ -147,9 +290,9 @@ const SearchPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                ) : searchResults.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {searchResults.map(company => (
+                ) : sortedResults.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {sortedResults.map(company => (
                       <CompanyCard
                         key={company.id}
                         company={company}
@@ -169,16 +312,8 @@ const SearchPage: React.FC = () => {
                 )}
               </TabsContent>
             </Tabs>
-          </div>
-        ) : (
-          <div className="text-center py-24 border rounded-lg bg-muted/30">
-            <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-medium mb-2">Search for interview content</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Enter a company name, job role, or keywords to find relevant posts and companies
-            </p>
-          </div>
-        )}
+          </main>
+        </div>
       </div>
     </AppLayout>
   );

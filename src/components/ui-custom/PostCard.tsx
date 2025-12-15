@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpCircle, MessageCircle, Repeat, Bookmark, MoreHorizontal, Share2, Lock } from 'lucide-react';
+import { ArrowUpCircle, MessageCircle, Share2, Bookmark } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,151 +21,118 @@ const PostCard: React.FC<PostCardProps> = ({ post, onUpvote, compact = false }) 
   return (
     <Card
       className={cn(
-        'overflow-hidden transition-all duration-200',
-        'border border-slate-100 dark:border-slate-800 rounded-lg',
-        'hover:shadow-glass hover:-translate-y-0.5',
-        compact ? 'p-2' : ''
+        'group relative overflow-hidden transition-all duration-300 border border-border/60 bg-card hover:border-primary/20',
+        compact ? 'p-0 shadow-none border-0 bg-transparent' : 'rounded-xl hover:shadow-lg hover:shadow-primary/5'
       )}
-      aria-labelledby={`post-${post.id}-title`}
     >
-      <CardContent className={cn('p-4', compact ? 'p-3' : 'p-4')}>
-        <div className="flex gap-3">
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            <Avatar className={cn(compact ? 'h-9 w-9' : 'h-10 w-10')}>
-              {post.author.avatar ? (
-                <AvatarImage src={post.author.avatar} alt={post.author.name} />
-              ) : (
-                <AvatarFallback>{post.author.name?.charAt(0)}</AvatarFallback>
-              )}
+      <CardContent className={cn('p-5', compact ? 'p-0' : '')}>
+        <div className="flex gap-4">
+          <Link to={`/profile/${post.author.id}`} className="flex-shrink-0">
+            <Avatar className={cn('border border-border/50', compact ? 'h-10 w-10' : 'h-11 w-11')}>
+              <AvatarImage src={post.author.avatar} alt={post.author.name} />
+              <AvatarFallback>{post.author.name?.charAt(0)}</AvatarFallback>
             </Avatar>
-          </div>
+          </Link>
 
-          {/* Body */}
           <div className="flex-1 min-w-0">
-            <header className="flex items-start justify-between">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3
-                    id={`post-${post.id}-title`}
-                    className="text-sm font-semibold truncate text-foreground"
-                  >
-                    {post.author.name}
-                  </h3>
-
-                  <span className="text-xs text-muted-foreground">·</span>
-
-                  <time
-                    className="text-xs text-muted-foreground truncate"
-                    dateTime={new Date(post.createdAt).toISOString()}
-                    title={new Date(post.createdAt).toLocaleString()}
-                  >
-                    {timeLabel}
-                  </time>
-                </div>
-
-                {/* company badge on same line (small) */}
-                <div className="mt-1 flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    {post.company}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* menu / more */}
-              <div className="ml-2 flex items-start">
-                <button
-                  aria-label="More"
-                  title="More"
-                  className="inline-flex p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+            {/* Header: Name, Company, Date */}
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Link
+                  to={`/profile/${post.author.id}`}
+                  className="font-semibold text-foreground hover:underline decoration-primary/50 underline-offset-2"
                 >
-                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                </button>
+                  {post.author.name}
+                </Link>
+                {post.company && (
+                  <>
+                    <span>in</span>
+                    <span className="font-medium text-foreground">{post.company}</span>
+                  </>
+                )}
+                <span>•</span>
+                <span className="text-xs">{timeLabel}</span>
               </div>
-            </header>
+            </div>
 
-            {/* Title */}
-            <Link to={`/post/${post.id}`} className="block mt-2 hover:no-underline">
-              <h4 className="font-semibold text-base leading-snug transition-colors hover:text-primary truncate">
+            {/* Content Link */}
+            <Link to={`/post/${post.id}`} className="block group-hover:opacity-95 transition-opacity">
+              <h3 className="text-lg font-bold leading-tight mb-2 text-foreground group-hover:text-primary transition-colors">
                 {post.title}
-              </h4>
+              </h3>
 
-              {/* Content snippet */}
-              <p className="mt-2 text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+              <p className="text-muted-foreground text-[15px] leading-relaxed line-clamp-3 mb-3">
                 {post.content}
               </p>
 
-              {/* Tags & premium */}
-              <div className="mt-2 flex items-center gap-2 flex-wrap">
-                {post.tags?.length > 0 &&
-                  post.tags.slice(0, 3).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs font-normal">
+              {/* Tags */}
+              {post.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {post.tags.slice(0, 3).map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="rounded-md font-normal px-2 bg-secondary/50 text-secondary-foreground hover:bg-secondary"
+                    >
                       {tag}
                     </Badge>
                   ))}
-
-                {post.isPremium && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Lock className="h-3.5 w-3.5" />
-                    <span>Premium</span>
-                  </div>
-                )}
-              </div>
+                  {post.isPremium && (
+                    <Badge variant="default" className="rounded-md px-2 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-500/20 shadow-none">
+                      Premium
+                    </Badge>
+                  )}
+                </div>
+              )}
             </Link>
 
-            {/* Actions */}
-            <div className="mt-3 flex items-center gap-4 pt-3 border-t">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 gap-1.5 text-muted-foreground hover:text-primary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onUpvote(post.id);
-                }}
-                aria-label="Upvote"
-                title="Upvote"
-              >
-                <ArrowUpCircle className="h-4 w-4" />
-                <span className="text-xs">{post.upvotes}</span>
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 gap-1.5 text-muted-foreground hover:text-primary"
-                asChild
-              >
-                <Link to={`/post/${post.id}#comments`} onClick={(e) => e.stopPropagation()}>
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="text-xs">{post.comments}</span>
-                </Link>
-              </Button>
-
-              <button
-                className="inline-flex items-center gap-1.5 h-8 px-2 rounded-md text-muted-foreground hover:text-primary"
-                onClick={(e) => e.preventDefault()}
-                title="Share"
-                aria-label="Share"
-              >
-                <Share2 className="h-4 w-4" />
-              </button>
-
-              <div className="ml-auto flex items-center gap-2">
-                <button
-                  className="inline-flex items-center p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
-                  aria-label="More actions"
+            {/* Footer Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-border/40">
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "rounded-full px-3 h-9 gap-2 text-muted-foreground hover:text-primary hover:bg-primary/5 group/btn",
+                    post.upvotes > 0 ? "text-muted-foreground" : ""
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onUpvote(post.id);
+                  }}
                 >
-                  <Repeat className="h-4 w-4 text-muted-foreground" />
-                </button>
+                  <ArrowUpCircle className="h-[18px] w-[18px] group-hover/btn:scale-110 transition-transform" />
+                  <span className="font-medium">{post.upvotes > 0 ? post.upvotes : 'Upvote'}</span>
+                </Button>
 
-                <button
-                  className="inline-flex items-center p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
-                  aria-label="Bookmark"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full px-3 h-9 gap-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/5 group/btn"
+                  asChild
                 >
-                  <Bookmark className="h-4 w-4 text-muted-foreground" />
-                </button>
+                  <Link to={`/post/${post.id}#comments`}>
+                    <MessageCircle className="h-[18px] w-[18px] group-hover/btn:scale-110 transition-transform" />
+                    <span className="font-medium">{post.comments > 0 ? post.comments : 'Comment'}</span>
+                  </Link>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full h-9 w-9 text-muted-foreground hover:text-green-500 hover:bg-green-500/5"
+                >
+                  <Share2 className="h-[18px] w-[18px]" />
+                </Button>
               </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full h-9 w-9 text-muted-foreground hover:text-orange-500 hover:bg-orange-500/5"
+              >
+                <Bookmark className="h-[18px] w-[18px]" />
+              </Button>
             </div>
           </div>
         </div>

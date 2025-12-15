@@ -231,6 +231,7 @@ const HomePage: React.FC = () => {
                           company={company}
                           onFollow={followCompany}
                           onUnfollow={unfollowCompany}
+                          variant="list"
                         />
                       ))}
                     </div>
